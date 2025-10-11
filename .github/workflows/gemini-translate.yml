@@ -1,0 +1,41 @@
+name: Gemini Document Translation
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+    paths:
+      - '**.md'
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  translate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Find changed markdown files
+        id: changed-files
+        run: |
+          git fetch origin ${{ github.event.pull_request.base.ref }}
+          CHANGED_FILES=$(git diff --name-only origin/${{ github.event.pull_request.base.ref }}...HEAD | grep -E '\.md$' | grep -v -E '\.(ja|zh-TW|zh-CN)\.md$' || true)
+          if [ -z "$CHANGED_FILES" ]; then
+            echo "has_files=false" >> $GITHUB_OUTPUT
+          else
+            echo "has_files=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Run Gemini translation
+        if: steps.changed-files.outputs.has_files == 'true'
+        uses: google-github-actions/run-gemini-cli@v0
+        with:
+          gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
+          prompt: |
+            Translate changed markdown files in this PR to Japanese, Traditional Chinese, and Simplified Chinese.
+            Post translations as a comment. Do not create files.
