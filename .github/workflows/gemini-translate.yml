@@ -29,39 +29,39 @@ jobs:
             **.zh-TW.md
             **.zh-CN.md
 
-- name: Run Gemini translation
-  if: steps.changed-files.outputs.any_changed == 'true'
-  uses: google-github-actions/run-gemini-cli@v0
-  env:
-    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN || github.token }}
-    PULL_REQUEST_NUMBER: ${{ github.event.pull_request.number }}
-    REPOSITORY: ${{ github.repository }}
-  with:
-    gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
-    settings: |
-      {
-        "mcpServers": {
-          "github": {
-            "command": "docker",
-            "args": [
-              "run",
-              "-i",
-              "--rm",
-              "-e",
-              "GITHUB_PERSONAL_ACCESS_TOKEN",
-              "ghcr.io/github/github-mcp-server"
-            ],
-            "includeTools": [
-              "create_or_update_issue_comment"
-            ],
-            "env": {
-              "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}"
+      - name: Run Gemini translation
+        if: steps.changed-files.outputs.any_changed == 'true'
+        uses: google-github-actions/run-gemini-cli@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN || github.token }}
+          PULL_REQUEST_NUMBER: ${{ github.event.pull_request.number }}
+          REPOSITORY: ${{ github.repository }}
+        with:
+          gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
+          settings: |
+            {
+              "mcpServers": {
+                "github": {
+                  "command": "docker",
+                  "args": [
+                    "run",
+                    "-i",
+                    "--rm",
+                    "-e",
+                    "GITHUB_PERSONAL_ACCESS_TOKEN",
+                    "ghcr.io/github/github-mcp-server"
+                  ],
+                  "includeTools": [
+                    "create_or_update_issue_comment"
+                  ],
+                  "env": {
+                    "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}"
+                  }
+                }
+              }
             }
-          }
-        }
-      }
-    prompt: |
-      Translate the following changed markdown files to Japanese, Traditional Chinese, and Simplified Chinese:
-      ${{ steps.changed-files.outputs.all_changed_files }}
+          prompt: |
+            Translate the following changed markdown files to Japanese, Traditional Chinese, and Simplified Chinese:
+            ${{ steps.changed-files.outputs.all_changed_files }}
 
-      After translating, post the translations as a comment on Pull Request #${{ env.PULL_REQUEST_NUMBER }} in repository ${{ env.REPOSITORY }} using the mcp__github__create_or_update_issue_comment tool.
+            After translating, post the translations as a comment on Pull Request #${{ env.PULL_REQUEST_NUMBER }} in repository ${{ env.REPOSITORY }} using the mcp__github__create_or_update_issue_comment tool.
