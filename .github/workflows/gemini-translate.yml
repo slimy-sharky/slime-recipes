@@ -1,4 +1,4 @@
-name: Gemini Document Translation
+name: Markdown Translation
 
 on:
   pull_request:
@@ -8,7 +8,7 @@ on:
 
 permissions:
   contents: read
-  pull-requests: write
+  pull-requests: read
 
 jobs:
   translate:
@@ -16,7 +16,12 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
 
       - name: Get changed files
         id: changed-files
@@ -29,39 +34,12 @@ jobs:
             **.zh-TW.md
             **.zh-CN.md
 
-      - name: Run Gemini translation
+      - name: Translate to Japanese, Traditional Chinese, and Simplified Chinese
         if: steps.changed-files.outputs.any_changed == 'true'
-        uses: google-github-actions/run-gemini-cli@v0
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN || github.token }}
-          PULL_REQUEST_NUMBER: ${{ github.event.pull_request.number }}
-          REPOSITORY: ${{ github.repository }}
+        uses: ikhsan3adi/markdown-translator@v2
         with:
-          gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
-          settings: |
-            {
-              "mcpServers": {
-                "github": {
-                  "command": "docker",
-                  "args": [
-                    "run",
-                    "-i",
-                    "--rm",
-                    "-e",
-                    "GITHUB_PERSONAL_ACCESS_TOKEN",
-                    "ghcr.io/github/github-mcp-server"
-                  ],
-                  "includeTools": [
-                    "create_or_update_issue_comment"
-                  ],
-                  "env": {
-                    "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}"
-                  }
-                }
-              }
-            }
-          prompt: |
-            Translate the following changed markdown files to Japanese, Traditional Chinese, and Simplified Chinese:
-            ${{ steps.changed-files.outputs.all_changed_files }}
-
-            After translating, post the translations as a comment on Pull Request #${{ env.PULL_REQUEST_NUMBER }} in repository ${{ env.REPOSITORY }} using the mcp__github__create_or_update_issue_comment tool.
+          LANG: |-
+            ja
+            zh-TW
+            zh-CN
+          FILES: ${{ steps.changed-files.outputs.all_changed_files }}
