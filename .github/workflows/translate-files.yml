@@ -50,11 +50,11 @@ jobs:
       matrix:
         file: ${{ fromJson(needs.get-files.outputs.matrix) }}
         lang:
-          - code: en-ja
+          - code: ja
             suffix: ja
-          - code: en-zh-CN
+          - code: zh-CN
             suffix: zh-CN
-          - code: en-zh-TW
+          - code: zh-TW
             suffix: zh-TW
     steps:
       - name: Checkout code
@@ -63,24 +63,74 @@ jobs:
           ref: ${{ github.head_ref }}
           fetch-depth: 0
 
-      - name: Translate file
-        uses: fabasoad/translation-action@v3.1.8
-        id: translate
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          provider: google
-          lang: ${{ matrix.lang.code }}
-          source: ${{ matrix.file }}
+          node-version: '20'
 
-      - name: Save translation
+      - name: Install google-translate-api-x
+        run: npm install google-translate-api-x
+
+      - name: Translate file
         run: |
+          cat << 'EOF' > translate.mjs
+          import { translate } from 'google-translate-api-x';
+          import { readFileSync, writeFileSync } from 'fs';
+
+          const filePath = process.argv[2];
+          const targetLang = process.argv[3];
+          const outputPath = process.argv[4];
+
+          const content = readFileSync(filePath, 'utf8');
+
+          translate(content, { to: targetLang, forceBatch: false, fallbackBatch: true })
+            .then(res => {
+              writeFileSync(outputPath, res.text, 'utf8');
+              console.log(`Translation completed: ${outputPath}`);
+            })
+            .catch(err => {
+              console.error('Translation error:', err);
+              process.exit(1);
+            });
+          EOF
+
           base="${{ matrix.file }}"
           base="${base%.md}"
-          echo "${{ steps.translate.outputs.text }}" > "${base}.${{ matrix.lang.suffix }}.md"
+          output_file="${base}.${{ matrix.lang.suffix }}.md"
 
-      - name: Commit translated file
+          node translate.mjs "${{ matrix.file }}" "${{ matrix.lang.code }}" "$output_file"
+
+      - name: Upload translated file
+        uses: actions/upload-artifact@v4
+        with:
+          name: translated-${{ matrix.lang.suffix }}-${{ hashFiles(matrix.file) }}
+          path: "**.${{ matrix.lang.suffix }}.md"
+          retention-days: 1
+
+  commit:
+    needs: translate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+
+      - name: Download all translations
+        uses: actions/download-artifact@v4
+        with:
+          pattern: translated-*
+          merge-multiple: true
+
+      - name: Commit all translations
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
           git add "*.md"
-          git commit -m "Add ${{ matrix.lang.suffix }} translation for ${{ matrix.file }}" || echo "No changes to commit"
-          git push origin HEAD:${{ github.head_ref }}
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "Add translations for modified markdown files"
+            git push origin HEAD:${{ github.head_ref }}
+          fi
