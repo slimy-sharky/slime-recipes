@@ -8,7 +8,7 @@ on:
 
 permissions:
   contents: write
-  pull-requests: read
+  pull-requests: write
 
 jobs:
   get-files:
@@ -19,6 +19,9 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
 
       - name: Get changed files
         id: changed-files
@@ -56,6 +59,9 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
 
       - name: Translate file
         uses: fabasoad/translation-action@v3.1.8
@@ -77,4 +83,4 @@ jobs:
           git config --local user.name "github-actions[bot]"
           git add "*.md"
           git commit -m "Add ${{ matrix.lang.suffix }} translation for ${{ matrix.file }}" || echo "No changes to commit"
-          git push
+          git push origin HEAD:${{ github.head_ref }}
