@@ -47,12 +47,12 @@ jobs:
       matrix:
         file: ${{ fromJson(needs.get-files.outputs.matrix) }}
         lang:
-          - code: ja
+          - code: en-ja
             suffix: ja
-          - code: zh-tw
-            suffix: zh-TW
-          - code: zh-cn
+          - code: en-zh-CN
             suffix: zh-CN
+          - code: en-zh-TW
+            suffix: zh-TW
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -62,7 +62,7 @@ jobs:
         id: translate
         with:
           provider: google
-          lang: en-${{ matrix.lang.code }}
+          lang: ${{ matrix.lang.code }}
           source: ${{ matrix.file }}
 
       - name: Save translation
