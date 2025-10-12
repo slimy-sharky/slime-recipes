@@ -1,0 +1,136 @@
+name: Markdown Translation
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+    paths:
+      - '**.md'
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  get-files:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+      has_files: ${{ steps.changed-files.outputs.any_changed }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+
+      - name: Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v47
+        with:
+          files: |
+            **.md
+          files_ignore: |
+            **.ja.md
+            **.zh-TW.md
+            **.zh-CN.md
+
+      - name: Set matrix
+        id: set-matrix
+        if: steps.changed-files.outputs.any_changed == 'true'
+        run: |
+          files=(${{ steps.changed-files.outputs.all_changed_files }})
+          matrix=$(printf '%s\n' "${files[@]}" | jq -R . | jq -s -c .)
+          echo "matrix=$matrix" >> $GITHUB_OUTPUT
+
+  translate:
+    needs: get-files
+    if: needs.get-files.outputs.has_files == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        file: ${{ fromJson(needs.get-files.outputs.matrix) }}
+        lang:
+          - code: ja
+            suffix: ja
+          - code: zh-CN
+            suffix: zh-CN
+          - code: zh-TW
+            suffix: zh-TW
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: '24'
+
+      - name: Install google-translate-api-x
+        run: npm install google-translate-api-x
+
+      - name: Translate file
+        run: |
+          cat << 'EOF' > translate.mjs
+          import { translate } from 'google-translate-api-x';
+          import { readFileSync, writeFileSync } from 'fs';
+
+          const filePath = process.argv[2];
+          const targetLang = process.argv[3];
+          const outputPath = process.argv[4];
+
+          const content = readFileSync(filePath, 'utf8');
+
+          translate(content, { to: targetLang, forceBatch: false, fallbackBatch: true })
+            .then(res => {
+              writeFileSync(outputPath, res.text, 'utf8');
+              console.log(`Translation completed: ${outputPath}`);
+            })
+            .catch(err => {
+              console.error('Translation error:', err);
+              process.exit(1);
+            });
+          EOF
+
+          base="${{ matrix.file }}"
+          base="${base%.md}"
+          output_file="${base}.${{ matrix.lang.suffix }}.md"
+
+          node translate.mjs "${{ matrix.file }}" "${{ matrix.lang.code }}" "$output_file"
+
+      - name: Upload translated file
+        uses: actions/upload-artifact@v4
+        with:
+          name: translated-${{ matrix.lang.suffix }}-${{ hashFiles(matrix.file) }}
+          path: "**.${{ matrix.lang.suffix }}.md"
+          retention-days: 1
+
+  commit:
+    needs: translate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+
+      - name: Download all translations
+        uses: actions/download-artifact@v4
+        with:
+          pattern: translated-*
+          merge-multiple: true
+
+      - name: Commit all translations
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add "*.md"
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "Add translations for modified markdown files"
+            git push origin HEAD:${{ github.head_ref }}
+          fi
