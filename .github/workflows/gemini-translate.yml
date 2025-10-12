@@ -36,7 +36,7 @@ jobs:
 
       - name: Translate to Japanese, Traditional Chinese, and Simplified Chinese
         if: steps.changed-files.outputs.any_changed == 'true'
-        uses: ikhsan3adi/markdown-translator@v2
+        uses: ikhsan3adi/markdown-translator@v2.5
         with:
           LANG: |-
             ja
