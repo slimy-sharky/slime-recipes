@@ -46,7 +46,13 @@ jobs:
     strategy:
       matrix:
         file: ${{ fromJson(needs.get-files.outputs.matrix) }}
-        lang: [ja, zh-TW, zh-CN]
+        lang:
+          - code: ja
+            suffix: ja
+          - code: zh-tw
+            suffix: zh-TW
+          - code: zh-cn
+            suffix: zh-CN
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -56,19 +62,19 @@ jobs:
         id: translate
         with:
           provider: google
-          lang: en-${{ matrix.lang }}
+          lang: en-${{ matrix.lang.code }}
           source: ${{ matrix.file }}
 
       - name: Save translation
         run: |
           base="${{ matrix.file }}"
           base="${base%.md}"
-          echo "${{ steps.translate.outputs.text }}" > "${base}.${{ matrix.lang }}.md"
+          echo "${{ steps.translate.outputs.text }}" > "${base}.${{ matrix.lang.suffix }}.md"
 
       - name: Commit translated file
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
           git add "*.md"
-          git commit -m "Add ${{ matrix.lang }} translation for ${{ matrix.file }}" || echo "No changes to commit"
+          git commit -m "Add ${{ matrix.lang.suffix }} translation for ${{ matrix.file }}" || echo "No changes to commit"
           git push
