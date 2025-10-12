@@ -14,7 +14,8 @@ jobs:
   get-files:
     runs-on: ubuntu-latest
     outputs:
-      files: ${{ steps.changed-files.outputs.all_changed_files }}
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+      has_files: ${{ steps.changed-files.outputs.any_changed }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -29,15 +30,22 @@ jobs:
             **.ja.md
             **.zh-TW.md
             **.zh-CN.md
-          json: true
+
+      - name: Set matrix
+        id: set-matrix
+        if: steps.changed-files.outputs.any_changed == 'true'
+        run: |
+          files=(${{ steps.changed-files.outputs.all_changed_files }})
+          matrix=$(printf '%s\n' "${files[@]}" | jq -R . | jq -s -c .)
+          echo "matrix=$matrix" >> $GITHUB_OUTPUT
 
   translate:
     needs: get-files
-    if: needs.get-files.outputs.files != '[]'
+    if: needs.get-files.outputs.has_files == 'true'
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        file: ${{ fromJson(needs.get-files.outputs.files) }}
+        file: ${{ fromJson(needs.get-files.outputs.matrix) }}
         lang: [ja, zh-TW, zh-CN]
     steps:
       - name: Checkout code
@@ -61,6 +69,6 @@ jobs:
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          git add "${base}.${{ matrix.lang }}.md"
+          git add "*.md"
           git commit -m "Add ${{ matrix.lang }} translation for ${{ matrix.file }}" || echo "No changes to commit"
           git push
