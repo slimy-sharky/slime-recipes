@@ -95,7 +95,18 @@ jobs:
 
           translate(content, { to: targetLang, forceBatch: false, fallbackBatch: true })
             .then(res => {
-              writeFileSync(outputPath, res.text, 'utf8');
+              let fixedText = res.text;
+
+              fixedText = fixedText.replace(/＃/g, '#');
+              fixedText = fixedText.replace(/＊/g, '*');
+              fixedText = fixedText.replace(/＿/g, '_');
+              fixedText = fixedText.replace(/｀/g, '`');
+              fixedText = fixedText.replace(/［/g, '[');
+              fixedText = fixedText.replace(/］/g, ']');
+              fixedText = fixedText.replace(/｛/g, '{');
+              fixedText = fixedText.replace(/｝/g, '}');
+
+              writeFileSync(outputPath, fixedText, 'utf8');
               console.log(`Translation completed: ${outputPath}`);
             })
             .catch(err => {
