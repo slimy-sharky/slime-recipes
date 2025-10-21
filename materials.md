@@ -23,12 +23,18 @@ Borate ions form hydrogen bonds with the numerous hydroxyl groups in PVA, and th
 Since hydroxide ions promote the generation of borate ions, we can create many cross-linked structures with small amount of borax.
 
 ## Guar Gum
-TBD
+
+## CMC (Carboxymethyl Cellulose)
+
+## Glycerol
+
+## PG (Propylene Glycol)
+
 
 ## Polyacrylic Acid
 TBD
 
-## CMC (Carboxymethyl Cellulose)
+## PEO (Polyethylene Oxide)
 TBD
 
 ## Starch
