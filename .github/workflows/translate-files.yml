@@ -24,6 +24,7 @@ jobs:
             "${{ github.event.issue.pull_request.url }}")
           echo "ref=$(echo $PR_DATA | jq -r .head.ref)" >> $GITHUB_OUTPUT
           echo "sha=$(echo $PR_DATA | jq -r .head.sha)" >> $GITHUB_OUTPUT
+          echo "base=$(echo $PR_DATA | jq -r .base.ref)" >> $GITHUB_OUTPUT
 
       - name: Checkout code
         uses: actions/checkout@v5
@@ -35,6 +36,7 @@ jobs:
         id: changed-files
         uses: tj-actions/changed-files@v47
         with:
+          base_sha: origin/${{ steps.get-pr.outputs.base }}
           files: |
             **.md
           files_ignore: |
