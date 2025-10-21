@@ -1,10 +1,8 @@
 name: Markdown Translation
 
 on:
-  pull_request:
-    types: [opened, synchronize]
-    paths:
-      - '**.md'
+  issue_comment:
+    types: [created]
 
 permissions:
   contents: write
@@ -12,6 +10,7 @@ permissions:
 
 jobs:
   get-files:
+    if: github.event.issue.pull_request && github.event.comment.body == '@github /translate'
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
@@ -20,7 +19,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v5
         with:
-          ref: ${{ github.head_ref }}
+          ref: ${{ github.event.pull_request.head.ref }}
           fetch-depth: 0
 
       - name: Get changed files
@@ -60,7 +59,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v5
         with:
-          ref: ${{ github.head_ref }}
+          ref: ${{ github.event.pull_request.head.ref }}
           fetch-depth: 0
 
       - name: Setup Node.js
@@ -114,7 +113,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v5
         with:
-          ref: ${{ github.head_ref }}
+          ref: ${{ github.event.pull_request.head.ref }}
           fetch-depth: 0
 
       - name: Download all translations
@@ -132,5 +131,5 @@ jobs:
             echo "No changes to commit"
           else
             git commit -m "Add translations for modified markdown files"
-            git push origin HEAD:${{ github.head_ref }}
+            git push origin HEAD:${{ github.event.pull_request.head.ref }}
           fi
