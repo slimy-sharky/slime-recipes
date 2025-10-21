@@ -15,11 +15,20 @@ jobs:
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
       has_files: ${{ steps.changed-files.outputs.any_changed }}
+      pr_ref: ${{ steps.get-pr.outputs.ref }}
     steps:
+      - name: Get PR details
+        id: get-pr
+        run: |
+          PR_DATA=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            "${{ github.event.issue.pull_request.url }}")
+          echo "ref=$(echo $PR_DATA | jq -r .head.ref)" >> $GITHUB_OUTPUT
+          echo "sha=$(echo $PR_DATA | jq -r .head.sha)" >> $GITHUB_OUTPUT
+
       - name: Checkout code
         uses: actions/checkout@v5
         with:
-          ref: ${{ github.event.pull_request.head.ref }}
+          ref: ${{ steps.get-pr.outputs.ref }}
           fetch-depth: 0
 
       - name: Get changed files
@@ -59,7 +68,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v5
         with:
-          ref: ${{ github.event.pull_request.head.ref }}
+          ref: ${{ needs.get-files.outputs.pr_ref }}
           fetch-depth: 0
 
       - name: Setup Node.js
@@ -107,13 +116,13 @@ jobs:
           retention-days: 1
 
   commit:
-    needs: translate
+    needs: [get-files, translate]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
         with:
-          ref: ${{ github.event.pull_request.head.ref }}
+          ref: ${{ needs.get-files.outputs.pr_ref }}
           fetch-depth: 0
 
       - name: Download all translations
@@ -131,5 +140,5 @@ jobs:
             echo "No changes to commit"
           else
             git commit -m "Add translations for modified markdown files"
-            git push origin HEAD:${{ github.event.pull_request.head.ref }}
+            git push origin HEAD:${{ needs.get-files.outputs.pr_ref }}
           fi
