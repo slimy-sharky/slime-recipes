@@ -22,8 +22,11 @@ Borate ions form hydrogen bonds with the numerous hydroxyl groups in PVA, and th
 
 Since hydroxide ions promote the generation of borate ions, we can create many cross-linked structures with small amount of borax.
 
+## Boric Acid
+TBD
+
 ## Guar Gum
-Guar Gum acts as a thickening agent and increases viscosity of the slime.
+Guar gum acts as a thickening agent and increases viscosity of the slime.
 It also forms weak cross-links with borate ions through its hydroxyl groups.
 It has a sweet smell, and when it's dissolved in water, the water turns a light yellow.
 
@@ -35,11 +38,20 @@ Unlike guar gum, it hardly reacts with borate ions, and when it's dissolved in w
 Glycerol and PG act as plasticizers because they have lower molecular weight and fewer hydroxyl groups compared to PVA or guar gum.
 They are commonly used as moisturizers in cosmetics, so they also help prevent skin dryness during slime handling.
 
-## Polyacrylic Acid
-TBD
+## Sodium Polyacrylate
+Sodium polyacrylate is a superabsorbent polymer used as lubricant that forms thick film.
+It's very common in Japan as a lubricant, so it's easy to get it if you live in Japan.
+When it's hydrated, it becomes a gel-like substance and reduces the stickiness of slime.
 
 ## PEO (Polyethylene Oxide)
-TBD
+PEO has various uses depending on its molecular weight.
+Low molecular weight PEO is used as a moisturizer, while high molecular weight PEO is used as a lubricant.
+The film it creates is relatively thin, so it has little effect on the slime's stickiness.
+
+## Xanthan Gum
+Xanthan gum is a polysaccharide used as a lubricant that forms thin film.
+It's resistant to heat and pH changes, so you can use it even when heating is required.
+It has a stringy texture, and it helps improve the slime's appearance.
 
 ## Starch
 TBD
