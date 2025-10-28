@@ -61,10 +61,10 @@ Xanthan gum has a synergistic effect with guar gum, and they show maximum effect
 Starch is a polymer composed of many glucose molecules.
 The properties of starch vary depending on the ratio of amylose to amylopectin, particle size, and crystalline structure, so starch properties differ among plant species.
 
-###　Potato Starch
+### Potato Starch
 Potato starch has high viscosity and a thick consistency. It's suitable for making slime glossy because of its high transparency.
 
-###　Tapioca Starch
+### Tapioca Starch
 Tapioca starch has high viscosity and creates a chewy texture.
 The chewy texture remains even after cooling.
 It also has high transparency like potato starch, but has lower consistency.
