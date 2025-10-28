@@ -22,8 +22,11 @@ Borate ions form hydrogen bonds with the numerous hydroxyl groups in PVA, and th
 
 Since hydroxide ions promote the generation of borate ions, we can create many cross-linked structures with small amount of borax.
 
-## Boric Acid
-TBD
+## Boric Acid and Sodium Bicarbonate
+Boric acid is an acidic substance.
+When it's dissolved in water, it produces borate ions, but the acidic solution doesn't produce sufficient borate ions for slime formation.
+Therefore, we need to make the solution basic by adding a base such as sodium bicarbonate.
+
 
 ## Guar Gum
 Guar gum acts as a thickening agent and increases viscosity of the slime.
@@ -49,9 +52,23 @@ Low molecular weight PEO is used as a moisturizer, while high molecular weight P
 The film it creates is relatively thin, so it has little effect on the slime's stickiness.
 
 ## Xanthan Gum
-Xanthan gum is a polysaccharide used as a lubricant that forms thin film.
-It's resistant to heat and pH changes, so you can use it even when heating is required.
-It has a stringy texture, and it helps improve the slime's appearance.
+Xanthan gum is a polysaccharide used as a lubricant that forms a thin film.
+It is resistant to heat and pH changes, so it can be used even when heating is required.
+It has a stringy texture and helps improve the slime's appearance.
+Xanthan gum has a synergistic effect with guar gum, and they show maximum effect at a 1:4 ratio.
 
 ## Starch
-TBD
+Starch is a polymer composed of many glucose molecules.
+The properties of starch vary depending on the ratio of amylose to amylopectin, particle size, and crystalline structure, so starch properties differ among plant species.
+
+###　Potato Starch
+Potato starch has high viscosity and a thick consistency. It's suitable for making slime glossy because of its high transparency.
+
+###　Tapioca Starch
+Tapioca starch has high viscosity and creates a chewy texture.
+The chewy texture remains even after cooling.
+It also has high transparency like potato starch, but has lower consistency.
+
+### Glutinous rice starch
+Glutinous rice starch has very strong stickiness and creates a chewy texture like tapioca starch.
+When it's dissolved in water, the water turns white.
