@@ -27,7 +27,6 @@ Boric acid is an acidic substance.
 When it's dissolved in water, it produces borate ions, but the acidic solution doesn't produce sufficient borate ions for slime formation.
 Therefore, we need to make the solution basic by adding a base such as sodium bicarbonate.
 
-
 ## Guar Gum
 Guar gum acts as a thickening agent and increases viscosity of the slime.
 It also forms weak cross-links with borate ions through its hydroxyl groups.
@@ -72,3 +71,14 @@ It also has high transparency like potato starch, but has lower consistency.
 ### Glutinous rice starch
 Glutinous rice starch has very strong stickiness and creates a chewy texture like tapioca starch.
 When it's dissolved in water, the water turns white.
+
+## Dextrin / Maltodextrin
+Dextrin is a substance produced by hydrolyzing starch and is used as a dispersing agent.
+The degree of starch decomposition is expressed by an indicator called Dextrose Equivalent (DE), which is a relative scale indicating the extent of starch hydrolysis, with dextrose (glucose) assigned a value of 100.
+Dextrin typically has a DE value ranging from approximately 5 to 20, and dextrin in this range is called maltodextrin.
+
+## Glucose
+Glucose is a substance produced when starch is completely hydrolyzed.
+It has a very low molecular weight and can be used as a plasticizer for slime.
+It's highly soluble in water and can be used in powder form.
+
