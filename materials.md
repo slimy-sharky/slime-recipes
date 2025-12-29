@@ -81,4 +81,3 @@ Dextrin typically has a DE value ranging from approximately 5 to 20, and dextrin
 Glucose is a substance produced when starch is completely hydrolyzed.
 It has a very low molecular weight and can be used as a plasticizer for slime.
 It's highly soluble in water and can be used in powder form.
-
