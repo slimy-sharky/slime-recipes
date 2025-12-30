@@ -8,12 +8,14 @@ If you can prepare pregelatinized potato starch:
 - glucose or sugar
 - maltodextrin
 - pregelatinized potato starch
+- PVA
 
 If you can't prepare pregelatinized potato starch:
 - borax
 - sodium sesquicarbonate or sodium bicarbonate
 - glucose or sugar
 - potato starch
+- PVA
 
 ## How to make
 If you can prepare pregelatinized potato starch:
