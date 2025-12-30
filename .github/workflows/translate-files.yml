@@ -124,8 +124,10 @@ jobs:
       - name: Upload translated file
         uses: actions/upload-artifact@v4
         with:
-          name: translated-${{ matrix.lang.suffix }}-${{ hashFiles(matrix.file) }}
-          path: "**.${{ matrix.lang.suffix }}.md"
+          # indexとrun_idを組み合わせて一意の名前を作成
+          name: translated-${{ matrix.lang.suffix }}-${{ strategy.job-index }}-${{ github.run_id }}
+          path: |
+            **/*.${{ matrix.lang.suffix }}.md
           retention-days: 1
 
   commit:
@@ -148,7 +150,10 @@ jobs:
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          git add "*.md"
+
+          # サブディレクトリ内の変更もすべて含めるためにドットを指定
+          git add .
+
           if git diff --staged --quiet; then
             echo "No changes to commit"
           else
