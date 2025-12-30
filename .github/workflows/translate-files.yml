@@ -60,11 +60,11 @@ jobs:
       matrix:
         file: ${{ fromJson(needs.get-files.outputs.matrix) }}
         lang:
-          - code: japanese
+          - code: ja
             suffix: ja
-          - code: simplified chinese
+          - code: zh-CN
             suffix: zh-CN
-          - code: traditional chinese
+          - code: zh-TW
             suffix: zh-TW
     steps:
       - name: Checkout code
@@ -73,55 +73,53 @@ jobs:
           ref: ${{ needs.get-files.outputs.pr_ref }}
           fetch-depth: 0
 
-      - name: Set up Python
-        uses: actions/setup-python@v6
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
         with:
-          python-version: '3.13'
+          node-version: '24'
 
-      - name: Install gpt4free
-        run: |
-          python -m pip install --upgrade pip
-          pip install -U g4f[all]
+      - name: Install google-translate-api-x
+        run: npm install google-translate-api-x
 
       - name: Translate file
         run: |
-          cat << 'EOF' > translate.py
-          import sys
-          import g4f
-          from g4f.client import Client
+          cat << 'EOF' > translate.mjs
+          import { translate } from 'google-translate-api-x';
+          import { readFileSync, writeFileSync } from 'fs';
 
-          def translate_text(file_path, target_lang, output_path):
-              with open(file_path, 'r', encoding='utf-8') as f:
-                  content = f.read()
+          const filePath = process.argv[2];
+          const targetLang = process.argv[3];
+          const outputPath = process.argv[4];
 
-              client = Client()
+          const content = readFileSync(filePath, 'utf8');
 
-              # システムプロンプトで翻訳を指示
-              prompt = f"Translate the following Markdown content to {target_lang}. Keep the original Markdown structure, formatting, and code blocks. Only return the translated text without any explanation.\n\n{content}"
+          translate(content, { to: targetLang, forceBatch: false, fallbackBatch: true })
+            .then(res => {
+              let fixedText = res.text;
 
-              try:
-                  response = client.chat.completions.create(
-                      model="gpt-4o-mini",
-                      messages=[{"role": "user", "content": prompt}]
-                  )
-                  translated_text = response.choices[0].message.content
+              fixedText = fixedText.replace(/＃/g, '#');
+              fixedText = fixedText.replace(/＊/g, '*');
+              fixedText = fixedText.replace(/＿/g, '_');
+              fixedText = fixedText.replace(/｀/g, '`');
+              fixedText = fixedText.replace(/［/g, '[');
+              fixedText = fixedText.replace(/］/g, ']');
+              fixedText = fixedText.replace(/｛/g, '{');
+              fixedText = fixedText.replace(/｝/g, '}');
 
-                  with open(output_path, 'w', encoding='utf-8') as f:
-                      f.write(translated_text)
-                  print(f"Successfully translated: {output_path}")
-              except Exception as e:
-                  print(f"Error during translation: {e}")
-                  sys.exit(1)
-
-          if __name__ == "__main__":
-              translate_text(sys.argv[1], sys.argv[2], sys.argv[3])
+              writeFileSync(outputPath, fixedText, 'utf8');
+              console.log(`Translation completed: ${outputPath}`);
+            })
+            .catch(err => {
+              console.error('Translation error:', err);
+              process.exit(1);
+            });
           EOF
 
           base="${{ matrix.file }}"
           base="${base%.md}"
           output_file="${base}.${{ matrix.lang.suffix }}.md"
 
-          python translate.py "${{ matrix.file }}" "${{ matrix.lang.code }}" "$output_file"
+          node translate.mjs "${{ matrix.file }}" "${{ matrix.lang.code }}" "$output_file"
 
       - name: Upload translated file
         uses: actions/upload-artifact@v4
