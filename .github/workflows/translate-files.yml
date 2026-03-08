@@ -52,20 +52,10 @@ jobs:
           matrix=$(printf '%s\n' "${files[@]}" | jq -R . | jq -s -c .)
           echo "matrix=$matrix" >> $GITHUB_OUTPUT
 
-  translate:
+  translate-and-commit:
     needs: get-files
     if: needs.get-files.outputs.has_files == 'true'
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        file: ${{ fromJson(needs.get-files.outputs.matrix) }}
-        lang:
-          - code: ja
-            suffix: ja
-          - code: zh-CN
-            suffix: zh-CN
-          - code: zh-TW
-            suffix: zh-TW
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
@@ -81,9 +71,7 @@ jobs:
       - name: Install deepl-node
         run: npm install deepl-node
 
-      - name: Translate file
-        env:
-          DEEPL_API_KEY: ${{ secrets.DEEPL_API_KEY }}
+      - name: Create translation script
         run: |
           cat << 'EOF' > translate.mjs
           import * as deepl from 'deepl-node';
@@ -102,65 +90,43 @@ jobs:
           async function main() {
             try {
               const content = readFileSync(filePath, 'utf8');
-
               const result = await translator.translateText(content, null, targetLang, {
                 tagHandling: 'xml',
                 ignoreTags: ['code', 'pre']
               });
 
-              let fixedText = result.text;
-
-              fixedText = fixedText.replace(/＃/g, '#');
-              fixedText = fixedText.replace(/＊/g, '*');
-              fixedText = fixedText.replace(/＿/g, '_');
-              fixedText = fixedText.replace(/｀/g, '`');
-              fixedText = fixedText.replace(/［/g, '[');
-              fixedText = fixedText.replace(/］/g, ']');
-              fixedText = fixedText.replace(/｛/g, '{');
-              fixedText = fixedText.replace(/｝/g, '}');
+              let fixedText = result.text.replace(/＃/g, '#').replace(/＊/g, '*').replace(/＿/g, '_')
+                                        .replace(/｀/g, '`').replace(/［/g, '[').replace(/］/g, ']')
+                                        .replace(/｛/g, '{').replace(/｝/g, '}');
 
               writeFileSync(outputPath, fixedText, 'utf8');
-              console.log(`Translation completed: ${outputPath}`);
+              console.log(`  -> Saved: ${outputPath}`);
             } catch (err) {
-              console.error('Translation error:', err);
+              console.error(`  -> Error translating ${filePath}:`, err);
               process.exit(1);
             }
           }
-
           main();
           EOF
 
-          base="${{ matrix.file }}"
-          base="${base%.md}"
-          output_file="${base}.${{ matrix.lang.suffix }}.md"
+      - name: Run translations sequentially
+        env:
+          DEEPL_API_KEY: ${{ secrets.DEEPL_API_KEY }}
+          FILES_JSON: ${{ needs.get-files.outputs.matrix }}
+        run: |
+          langs=("ja" "zh-CN" "zh-TW")
 
-          node translate.mjs "${{ matrix.file }}" "${{ matrix.lang.code }}" "$output_file"
+          for file in $(echo "$FILES_JSON" | jq -r '.[]'); do
+            echo "Processing $file..."
+            for lang in "${langs[@]}"; do
+              base="${file%.md}"
+              output_file="${base}.${lang}.md"
+              echo "  Translating to $lang..."
+              node translate.mjs "$file" "$lang" "$output_file"
+            done
+          done
 
-      - name: Upload translated file
-        uses: actions/upload-artifact@v4
-        with:
-          name: translated-${{ matrix.lang.suffix }}-${{ strategy.job-index }}-${{ github.run_id }}
-          path: |
-            **/*.${{ matrix.lang.suffix }}.md
-          retention-days: 1
-
-  commit:
-    needs: [get-files, translate]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v5
-        with:
-          ref: ${{ needs.get-files.outputs.pr_ref }}
-          fetch-depth: 0
-
-      - name: Download all translations
-        uses: actions/download-artifact@v4
-        with:
-          pattern: translated-*
-          merge-multiple: true
-
-      - name: Commit all translations
+      - name: Commit and Push
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
