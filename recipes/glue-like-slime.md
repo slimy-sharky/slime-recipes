@@ -19,3 +19,4 @@ Glue is a sticky, gooey liquid that stretches well. Creating a glue-like slime i
 
 ## Shelf life
 Two weeks
+
