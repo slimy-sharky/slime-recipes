@@ -20,3 +20,4 @@ Xanthan gum has a synergistic effect with guar gum, and they show maximum effect
 ## CMC (Carboxymethyl Cellulose)
 CMC acts as a thickening agent and increases viscosity of the slime.
 Unlike guar gum, it hardly reacts with borate ions, and when it's dissolved in water, the solution remains clear.
+

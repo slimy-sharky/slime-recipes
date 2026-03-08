@@ -5,3 +5,4 @@ Dispersants are additives used to ensure a smooth and homogeneous consistency by
 Dextrin is a substance produced by hydrolyzing starch and is used as a dispersing agent.
 The degree of starch decomposition is expressed by an indicator called Dextrose Equivalent (DE), which is a relative scale indicating the extent of starch hydrolysis, with dextrose (glucose) assigned a value of 100.
 Dextrin typically has a DE value ranging from approximately 5 to 20, and dextrin in this range is called maltodextrin.
+
