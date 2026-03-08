@@ -52,20 +52,10 @@ jobs:
           matrix=$(printf '%s\n' "${files[@]}" | jq -R . | jq -s -c .)
           echo "matrix=$matrix" >> $GITHUB_OUTPUT
 
-  translate:
+  translate-and-commit:
     needs: get-files
     if: needs.get-files.outputs.has_files == 'true'
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        file: ${{ fromJson(needs.get-files.outputs.matrix) }}
-        lang:
-          - code: ja
-            suffix: ja
-          - code: zh-CN
-            suffix: zh-CN
-          - code: zh-TW
-            suffix: zh-TW
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
@@ -78,85 +68,81 @@ jobs:
         with:
           node-version: '24'
 
-      - name: Install google-translate-api-x
-        run: npm install google-translate-api-x
+      - name: Install @google/genai
+        run: npm install @google/genai
 
-      - name: Translate file
+      - name: Create translation script
         run: |
           cat << 'EOF' > translate.mjs
-          import { translate } from 'google-translate-api-x';
+          import { GoogleGenAI } from '@google/genai';
           import { readFileSync, writeFileSync } from 'fs';
+
+          const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+          const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
 
           const filePath = process.argv[2];
           const targetLang = process.argv[3];
           const outputPath = process.argv[4];
 
-          const content = readFileSync(filePath, 'utf8');
+          async function main() {
+            try {
+              const content = readFileSync(filePath, 'utf8');
 
-          translate(content, { to: targetLang, forceBatch: false, fallbackBatch: true })
-            .then(res => {
-              let fixedText = res.text;
+              const prompt = `Translate the following Markdown content to ${targetLang}.
+              Maintain all Markdown formatting, structure, and code blocks.
 
-              fixedText = fixedText.replace(/＃/g, '#');
-              fixedText = fixedText.replace(/＊/g, '*');
-              fixedText = fixedText.replace(/＿/g, '_');
-              fixedText = fixedText.replace(/｀/g, '`');
-              fixedText = fixedText.replace(/［/g, '[');
-              fixedText = fixedText.replace(/］/g, ']');
-              fixedText = fixedText.replace(/｛/g, '{');
-              fixedText = fixedText.replace(/｝/g, '}');
+              Content:
+              ${content}`;
 
-              writeFileSync(outputPath, fixedText, 'utf8');
-              console.log(`Translation completed: ${outputPath}`);
-            })
-            .catch(err => {
-              console.error('Translation error:', err);
+              const response = await ai.models.generateContent({
+                model: 'gemini-3.1-flash-lite-preview',
+                contents: prompt,
+              });
+
+              let translatedText = response.text;
+
+              const cleanText = translatedText.replace(/^```markdown\n?|^```md\n?/, '').replace(/\n?```$/, '');
+
+              writeFileSync(outputPath, cleanText, 'utf8');
+              console.log(`  -> Saved: ${outputPath}`);
+            } catch (err) {
+              console.error(`  -> Error translating ${filePath}:`, err);
               process.exit(1);
-            });
+            }
+          }
+          main();
           EOF
 
-          base="${{ matrix.file }}"
-          base="${base%.md}"
-          output_file="${base}.${{ matrix.lang.suffix }}.md"
+      - name: Run translations sequentially
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          FILES_JSON: ${{ needs.get-files.outputs.matrix }}
+        run: |
+          langs=("Japanese" "Simplified Chinese" "Traditional Chinese")
+          suffixes=("ja" "zh-CN" "zh-TW")
 
-          node translate.mjs "${{ matrix.file }}" "${{ matrix.lang.code }}" "$output_file"
+          for file in $(echo "$FILES_JSON" | jq -r '.[]'); do
+            echo "Processing $file..."
+            for i in "${!langs[@]}"; do
+              lang="${langs[$i]}"
+              suffix="${suffixes[$i]}"
+              base="${file%.md}"
+              output_file="${base}.${suffix}.md"
+              echo "  Translating to $lang..."
+              node translate.mjs "$file" "$lang" "$output_file"
+            done
+          done
 
-      - name: Upload translated file
-        uses: actions/upload-artifact@v4
-        with:
-          # indexとrun_idを組み合わせて一意の名前を作成
-          name: translated-${{ matrix.lang.suffix }}-${{ strategy.job-index }}-${{ github.run_id }}
-          path: |
-            **/*.${{ matrix.lang.suffix }}.md
-          retention-days: 1
-
-  commit:
-    needs: [get-files, translate]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v5
-        with:
-          ref: ${{ needs.get-files.outputs.pr_ref }}
-          fetch-depth: 0
-
-      - name: Download all translations
-        uses: actions/download-artifact@v4
-        with:
-          pattern: translated-*
-          merge-multiple: true
-
-      - name: Commit all translations
+      - name: Commit and Push
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
 
-          # サブディレクトリ内の変更もすべて含めるためにドットを指定
-          git add .
+          git add "**/*.md"
 
           if git diff --staged --quiet; then
             echo "No changes to commit"
           else
-            git commit -m "Add translations for modified markdown files"
+            git commit -m "Add translations using Gemini 2.5 Flash [skip ci]"
             git push origin HEAD:${{ needs.get-files.outputs.pr_ref }}
           fi
