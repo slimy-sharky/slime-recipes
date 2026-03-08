@@ -12,3 +12,4 @@ Since hydroxide ions promote the generation of borate ions, we can create many c
 Boric acid is an acidic substance.
 When it's dissolved in water, it produces borate ions, but the acidic solution doesn't produce sufficient borate ions for slime formation.
 Therefore, we need to make the solution basic by adding a base such as sodium bicarbonate.
+

@@ -30,3 +30,4 @@ It also has high transparency like potato starch, but has lower consistency.
 ### Glutinous rice starch
 Glutinous rice starch has very strong stickiness and creates a chewy texture like tapioca starch.
 When it's dissolved in water, the water turns white.
+

@@ -6,3 +6,4 @@ Sodium bicarbonate, commonly known as baking soda, is an alkaline agent that hel
 
 ## Sodium sesquicarbonate
 Sodium sesquicarbonate also serves to raise the pH level, facilitating a more efficient crosslinking reaction. Since it possesses a higher pH than sodium bicarbonate, it is highly effective at enhancing the preservation and long-term stability of the slime. Using this agent helps maintain the product's quality and extends its shelf-life by ensuring a more robust alkaline environment.
+
