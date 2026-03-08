@@ -143,6 +143,6 @@ jobs:
           if git diff --staged --quiet; then
             echo "No changes to commit"
           else
-            git commit -m "Add translations using Gemini 2.5 Flash [skip ci]"
+            git commit -m "Add translations"
             git push origin HEAD:${{ needs.get-files.outputs.pr_ref }}
           fi
