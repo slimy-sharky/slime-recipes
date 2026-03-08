@@ -78,24 +78,37 @@ jobs:
         with:
           node-version: '24'
 
-      - name: Install google-translate-api-x
-        run: npm install google-translate-api-x
+      - name: Install deepl-node
+        run: npm install deepl-node
 
       - name: Translate file
+        env:
+          DEEPL_API_KEY: ${{ secrets.DEEPL_API_KEY }}
         run: |
           cat << 'EOF' > translate.mjs
-          import { translate } from 'google-translate-api-x';
+          import * as deepl from 'deepl-node';
           import { readFileSync, writeFileSync } from 'fs';
 
+          const authKey = process.env.DEEPL_API_KEY;
+          const translator = new deepl.Translator(authKey);
+
           const filePath = process.argv[2];
-          const targetLang = process.argv[3];
+          let targetLang = process.argv[3];
           const outputPath = process.argv[4];
 
-          const content = readFileSync(filePath, 'utf8');
+          if (targetLang === 'zh-CN') targetLang = 'zh';
+          if (targetLang === 'zh-TW') targetLang = 'zh-hant';
 
-          translate(content, { to: targetLang, forceBatch: false, fallbackBatch: true })
-            .then(res => {
-              let fixedText = res.text;
+          async function main() {
+            try {
+              const content = readFileSync(filePath, 'utf8');
+
+              const result = await translator.translateText(content, null, targetLang, {
+                tagHandling: 'xml',
+                ignoreTags: ['code', 'pre']
+              });
+
+              let fixedText = result.text;
 
               fixedText = fixedText.replace(/＃/g, '#');
               fixedText = fixedText.replace(/＊/g, '*');
@@ -108,11 +121,13 @@ jobs:
 
               writeFileSync(outputPath, fixedText, 'utf8');
               console.log(`Translation completed: ${outputPath}`);
-            })
-            .catch(err => {
+            } catch (err) {
               console.error('Translation error:', err);
               process.exit(1);
-            });
+            }
+          }
+
+          main();
           EOF
 
           base="${{ matrix.file }}"
@@ -124,7 +139,6 @@ jobs:
       - name: Upload translated file
         uses: actions/upload-artifact@v4
         with:
-          # indexとrun_idを組み合わせて一意の名前を作成
           name: translated-${{ matrix.lang.suffix }}-${{ strategy.job-index }}-${{ github.run_id }}
           path: |
             **/*.${{ matrix.lang.suffix }}.md
@@ -151,7 +165,6 @@ jobs:
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
 
-          # サブディレクトリ内の変更もすべて含めるためにドットを指定
           git add .
 
           if git diff --staged --quiet; then
