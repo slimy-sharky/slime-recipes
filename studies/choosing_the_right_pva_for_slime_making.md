@@ -11,7 +11,7 @@ The degree of saponification indicates the percentage of hydroxyl groups in the 
 Unlike fully saponified grades, partially saponified PVA is soluble in cold water, making it much easier to prepare at home.
 
 ### Be careful for lump
-Because it dissolves readily, it can form large lumps if added too quickly to water. To avoid lumps, add the PVA powder slowly to water at $25^{\circ}C$ or lower while stirring. Once dispersed, heat the solution to $90^{\circ}C$ for 30 to 60 minutes to ensure it is completely dissolved.
+Because it dissolves readily, it can form large lumps if added too quickly to water. To avoid lumps, add the PVA powder slowly to water at 25℃ or lower while stirring. Once dispersed, heat the solution to 90℃ for 30 to 60 minutes to ensure it is completely dissolved.
 
 ## Degree of Polymerization
 the degree of polymerization represents the length of the polymer chain, determined by how many vinyl acetate molecules were linked during production.
@@ -29,7 +29,7 @@ Viscosity determines the thickness of your PVA solution. It changes depending on
 - Concentration
   - This refers to the amount of PVA dissolved in water (measured in mass percent). Viscosity increases exponentially as concentration rises, meaning even a small addition of PVA can make your slime much thicker.
 - Temperature
-  - Viscosity is highly temperature-dependent; as the solution cools (e.g., from $90^{\circ}C$ down to $10^{\circ}C$), the viscosity increases.
+  - Viscosity is highly temperature-dependent; as the solution cools (e.g., from 90℃ down to 10℃), the viscosity increases.
 
 ## Cloud Point
 The cloud point is the temperature at which a PVA solution begins to separate into two phases and appears turbid.
@@ -37,12 +37,12 @@ The cloud point is the temperature at which a PVA solution begins to separate in
 ### Phase Separation
 Because low degree of saponification (e.g., 80mol%) grades are more hydrophobic, they have lower cloud points than fully saponified types.
 
-If the temperature rises above the cloud point, the solution may separate, affecting the slime's clarity. To keep slime clear, store low degree of saponification grades' solutions at $30^{\circ}C$ or lower.
+If the temperature rises above the cloud point, the solution may separate, affecting the slime's clarity. To keep slime clear, store low degree of saponification grades' solutions at 30℃ or lower.
 
 ## Making slime with Kuraray Poval
 Kuraray Poval is a famous brand of PVA. For someone who want to make a high-quality slime, it's best to select grades with a high degree of polymerization.
 
-| Grade | Viscosity (4%, $20^{\circ}C$) [mPa·s] | Saponification [mol%] | Solubility |
+| Grade | Viscosity (4%, 20℃) [mPa·s] | Saponification [mol%] | Solubility |
 | :--- | :--- | :--- | :--- |
 | 48-80 | 45.0–51.0 | 78.5–80.5 | Dissolves in cold water |
 | 44-88 | 40.0–48.0 | 87.0–89.0 | Dissolves in hot water |
